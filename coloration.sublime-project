@@ -1,0 +1,46 @@
+{
+    "folders":
+    [
+        {
+            "path": ".",
+            "folder_exclude_patterns":
+            [
+                "//dist",
+                "*.egg-info",
+                "__pycache__"
+            ]
+        }
+    ],
+    "settings":
+    {
+        "default_line_ending": "unix",
+        "default_encoding": "UTF-8",
+        "tab_size": 4,
+        "translate_tabs_to_spaces": true,
+        "trim_automatic_white_space": true,
+        "trim_trailing_white_space_on_save": true
+    },
+    "build_systems":
+    [
+        {
+            "name": "codequal - file",
+            "selector": "source.python",
+            "quiet": true,
+            "word_wrap": false,
+            "working_dir": "$project_path",
+            "file_regex": "^\\s*(..[^:]*):(\\d+):(\\d+):\\s*([^\\n]+)",
+            "env": {"PYTHONIOENCODING": "utf-8"},
+            "shell_cmd": "python -B \"$project_path/scripts/codequal.py\" \"$file\""
+        },
+        {
+            "name": "codequal - project",
+            "selector": null,
+            "quiet": true,
+            "word_wrap": false,
+            "working_dir": "$project_path",
+            "file_regex": "^\\s*(..[^:]*):(\\d+):(\\d+):\\s*([^\\n]+)",
+            "env": {"PYTHONIOENCODING": "utf-8"},
+            "shell_cmd": "python -B \"$project_path/scripts/codequal.py\""
+        }
+    ]
+}

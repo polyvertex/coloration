@@ -1,0 +1,11 @@
+include .editorconfig
+include *.in
+include *.rst
+include *.sublime-project
+include *.txt
+graft coloration
+graft demos
+graft scripts
+graft tests
+global-exclude __pycache__
+global-exclude *.py[cod]
