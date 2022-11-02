@@ -75,6 +75,12 @@ class ColorationStreamHandler(_logging.StreamHandler):
     #: Set to `None` to disable this feature.
     SOURCEINFO_STYLE = _ansi.FG8_60  # MEDIUM_PURPLE_4
 
+    #: Default format of the *source* field, for a TTY stream
+    SOURCEINFO_FORMAT_TTY = " <{record.module}:{record.lineno}>"
+
+    #: Default format of the *source* field, for a non-TTY stream
+    SOURCEINFO_FORMAT_NONTTY = SOURCEINFO_FORMAT_TTY
+
     #: Default *fmt* value to pass to the `logging.Formatter`, for a TTY stream
     #:
     #: Use with care as you may obtain undesired results since this handler does
@@ -190,18 +196,21 @@ class ColorationStreamHandler(_logging.StreamHandler):
         # is set already
         assert self.formatter is formatter
 
-        self._can_style = styling
         self._insert_date = bool(datefmt)
         self._insert_level = levelinfo
         self._srcinfo_maxlevel = srcinfo
+        self._srcinfo_format = (
+            self.SOURCEINFO_FORMAT_TTY if is_tty
+            else self.SOURCEINFO_FORMAT_NONTTY)
         self._levelname_map = (
-            self.LEVELNAME_MAP_TTY if is_tty else self.LEVELNAME_MAP_NONTTY)
+            self.LEVELNAME_MAP_TTY if is_tty
+            else self.LEVELNAME_MAP_NONTTY)
 
         if not styling:
             self._date_style = None
             self._levelname_style_map = {}
             self._highlighter = None
-            self._sourceinfo_style = None
+            self._srcinfo_style = None
         else:
             self._date_style = self.join_styles(self.DATE_STYLE)
             self._levelname_style_map = {
@@ -209,7 +218,7 @@ class ColorationStreamHandler(_logging.StreamHandler):
                 for k, v in self.LEVELNAME_STYLE_MAP.items()}
             self._highlighter = select_highlighter(
                 highlighter, binary=stream.is_binary)
-            self._sourceinfo_style = self.join_styles(self.SOURCEINFO_STYLE)
+            self._srcinfo_style = self.join_styles(self.SOURCEINFO_STYLE)
 
     def setFormatter(self, *args, **kwargs):
         # method inherited from logging.Handler
@@ -296,11 +305,11 @@ class ColorationStreamHandler(_logging.StreamHandler):
 
         # srcinfo part
         if record.levelno <= self._srcinfo_maxlevel:
-            part = f"<{record.module}:{record.lineno}>"
-            if not self._sourceinfo_style:
-                _append(sep, part)
+            part = self._srcinfo_format.format(record=record)
+            if not self._srcinfo_style:
+                _append(part)
             else:
-                _append(sep, self._sourceinfo_style, part, rst)
+                _append(self._srcinfo_style, part, rst)
 
         return "".join(output)
 
