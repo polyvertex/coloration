@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+# Copyright (c) Jean-Charles Lefebvre
+# SPDX-License-Identifier: MIT
 
 import contextlib
 import os
@@ -7,10 +8,14 @@ import subprocess
 import sys
 
 PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+
 LINTERS = {
     "flake8": (),
-    "pylint": (),
-}
+    "pylint": ()}
+
+EXCLUDED_DIRS = (
+    "demo", "demos", "examples", "scripts", "tools", "test", "tests",
+    "t", "temp", "tmp")
 
 
 @contextlib.contextmanager
@@ -43,9 +48,6 @@ def safety_checks():
 
 
 def list_project_python_packages():
-    EXCLUDED = (
-        "demo", "demos", "examples", "scripts", "tools", "test", "tests",
-        "t", "temp", "tmp")
     packages = []
 
     with scoped_chdir(PROJECT_DIR):
@@ -54,7 +56,7 @@ def list_project_python_packages():
                 if not direntry.name or direntry.name[0] in (".", "_"):
                     continue
 
-                if direntry.name.lower() in EXCLUDED:
+                if direntry.name.lower() in EXCLUDED_DIRS:
                     continue
 
                 if not direntry.is_dir(follow_symlinks=False):
@@ -72,8 +74,9 @@ def list_project_python_packages():
 def run_linters(targets):
     discovered_packages = None
 
-    for linter, linterargs in LINTERS.items():
+    for linter, linter_args in LINTERS.items():
         if not targets and linter == "pylint":
+            # pylint requires an explicit input
             if discovered_packages is None:
                 discovered_packages = list_project_python_packages()
             linter_targets = discovered_packages
@@ -84,7 +87,7 @@ def run_linters(targets):
 
         cmdargs = [
             sys.executable, "-B", "-m", linter,
-            *linterargs, *linter_targets]
+            *linter_args, *linter_targets]
 
         print(f" >> LINTER {linter}: {targets_msg}", flush=True)
         res = subprocess.run(cmdargs, cwd=PROJECT_DIR, check=False)
