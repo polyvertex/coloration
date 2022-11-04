@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 import sys
 
 import _bootstrap  # noqa: F401
